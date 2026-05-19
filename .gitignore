@@ -1,0 +1,22 @@
+# Private & Verification Files
+mozilla-yedek-kimlik-dogrulama
+yedek-kimlik-dogrulama*
+*backup*
+*secret*
+
+# Build Packages
+*.zip
+*.xpi
+*.crx
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Editor & IDE Configs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
