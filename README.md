@@ -2,6 +2,8 @@
 
 A secure, offline-first browser extension that compares Steam and Epic Games libraries, displaying matte ownership HUD cards directly on product store pages to prevent accidental double purchases.
 
+[![Install on Firefox](https://img.shields.io/badge/Firefox_Add--ons-Install_Stashy-FF7139?style=for-the-badge&logo=firefox-browser&logoColor=white)](https://addons.mozilla.org/tr/firefox/addon/stashy/)
+
 Technology Stack: Vanilla JavaScript · Vanilla CSS · HTML5 · Chrome Storage API
 
 ---
