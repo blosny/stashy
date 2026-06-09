@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Stashy",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Compares Steam and Epic Games libraries, displaying ownership badges directly on store pages.",
   "author": "blosny",
 

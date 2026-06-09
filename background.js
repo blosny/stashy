@@ -177,6 +177,25 @@ function fuzzyMatch(a, b) {
   const shorter = a.length < b.length ? a : b;
   const longer  = a.length < b.length ? b : a;
   if (shorter.length < 5) return false;
-  return longer.startsWith(shorter) || longer.includes(shorter);
+
+  if (!longer.startsWith(shorter) && !longer.includes(shorter)) {
+    return false;
+  }
+
+  // Exact digit sequence match to prevent numbered sequels from matching (e.g., "Witcher 3" vs "Witcher 1")
+  const numA = a.replace(/[^0-9]/g, "");
+  const numB = b.replace(/[^0-9]/g, "");
+  if (numA !== numB) return false;
+
+  // Prevent roman numeral sequels (e.g., "Civilization V" vs "Civilization VI")
+  if (longer.startsWith(shorter)) {
+    const suffix = longer.substring(shorter.length);
+    const romanNumerals = /^(i|ii|iii|iv|v|vi|vii|viii|ix|x|xi|xii|xiii|xiv|xv|xvi|xvii|xviii|xix|xx)$/;
+    if (romanNumerals.test(suffix)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 

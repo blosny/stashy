@@ -39,8 +39,15 @@ async function fetchAllEpicGames() {
     while (page <= maxPages) {
       updateScanningOverlayText(`Scanning: Requesting page ${page}... Please wait.`);
       
-      const url = `https://accounts.epicgames.com/account/v2/payment/ajaxGetOrderHistory?nextPageToken=${encodeURIComponent(nextPageToken)}`;
-      const res = await fetch(url);
+      const url = `/account/v2/payment/ajaxGetOrderHistory?nextPageToken=${encodeURIComponent(nextPageToken)}`;
+      const res = await fetch(url, {
+        method: "GET",
+        credentials: "same-origin",
+        headers: {
+          "Accept": "application/json",
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      });
       if (!res.ok) {
         throw new Error(`HTTP Status ${res.status}`);
       }

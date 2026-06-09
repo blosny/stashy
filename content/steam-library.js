@@ -17,7 +17,7 @@ const chromeAPI = typeof chrome !== 'undefined' && chrome.runtime ? chrome : (ty
 
 async function waitAndExtract() {
   let attempts = 0;
-  const maxAttempts = 15;
+  const maxAttempts = 60; // Increased to allow large libraries to load
   let lastGamesCount = 0;
   let noChangeCount = 0;
 
@@ -59,6 +59,7 @@ async function waitAndExtract() {
         clearInterval(interval);
         console.warn("[Stashy] Steam: games list could not be loaded or is empty.");
         removeScanningOverlay();
+        showToast("Steam: No games found. Make sure your profile & game details are set to Public.", "#ef4444");
         resolve();
       }
     }, 1000);
