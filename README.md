@@ -6,6 +6,9 @@
   <a href="https://addons.mozilla.org/tr/firefox/addon/stashy/">
     <img src="https://img.shields.io/badge/Firefox_Add--ons-Install_Stashy-FF7139?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Install on Firefox">
   </a>
+  <a href="https://www.buymeacoffee.com/blosny">
+    <img src="https://img.shields.io/badge/Buy_Me_A_Coffee-Support_Project-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee">
+  </a>
 </div>
 
 ---
