@@ -1,24 +1,63 @@
-# Stashy
-
-A secure, offline-first browser extension that compares Steam and Epic Games libraries, displaying matte ownership HUD cards directly on product store pages to prevent accidental double purchases.
-
-[![Install on Firefox](https://img.shields.io/badge/Firefox_Add--ons-Install_Stashy-FF7139?style=for-the-badge&logo=firefox-browser&logoColor=white)](https://addons.mozilla.org/tr/firefox/addon/stashy/)
-
-Technology Stack: Vanilla JavaScript · Vanilla CSS · HTML5 · Chrome Storage API
+<div align="center">
+  <img src="icons/icon-128.png" alt="Stashy Logo" width="128">
+  <h1>Stashy</h1>
+  <p>A secure, offline-first browser extension that compares Steam and Epic Games libraries, displaying minimalist "Bento Grid" HUD cards directly on product store pages to prevent accidental double purchases.</p>
+  
+  <a href="https://addons.mozilla.org/tr/firefox/addon/stashy/">
+    <img src="https://img.shields.io/badge/Firefox_Add--ons-Install_Stashy-FF7139?style=for-the-badge&logo=firefox-browser&logoColor=white" alt="Install on Firefox">
+  </a>
+</div>
 
 ---
 
-## Architecture Overview
+## 🌟 What's New in V3 (v1.4.0)
+- **Bento Grid UI**: A complete visual overhaul featuring a sleek, solid anthracite (`#121212`) minimalist design inspired by Playnite.
+- **Dynamic Localization**: Full Bilingual Support (English & Turkish) that dynamically applies to menus, the library, and scanning overlays.
+- **SPA Watcher**: Perfected single-page application (SPA) support for the Epic Games store, triggering badges instantly without manual refreshes.
 
-Stashy operates entirely in the user space inside the local browser sandbox. It utilizes content scripts to read game catalog tables and inject reactive CSS overlays, a central service worker to coordinate normalization/matching, and native storage to maintain game databases without requesting account credentials.
+## 📸 Screenshots
 
-```
+| Extension Dashboard | Library Grid |
+| :---: | :---: |
+| <img src="docs/popup.png" alt="Popup Menu" width="350"> | <img src="docs/library.png" alt="Library Dashboard" width="350"> |
+| **Store Notification Badge** | **Scanning Overlay** |
+| <img src="docs/badge.png" alt="Store Badge" width="350"> | <img src="docs/scanning.png" alt="Scanning Progress" width="350"> |
+
+## 🚀 Key Features
+
+* **Zero-Click Passive Sync:** Browse your Steam Games list or Epic Transactions page, and Stashy securely indexes your library in the background.
+* **Base Game & DLC Guard:** Automatically compares titles and triggers clean alerts if you own a base game but are viewing an expanded bundle.
+* **100% Private & Local:** Zero external server connections, zero data collection, and zero credentials required. All data remains strictly inside your browser sandbox (`chrome.storage.local`).
+* **Cross-Platform:** Works natively on Chromium (Chrome, Edge, Brave) and Gecko (Firefox, Zen Browser) engines.
+
+---
+
+## 🛠️ Installation
+
+### 🦊 Firefox (Recommended)
+Download directly from the [Mozilla Add-ons Store](https://addons.mozilla.org/tr/firefox/addon/stashy/).
+
+### 🌈 Chrome, Edge & Brave (Manual Install)
+1. Download the latest `stashy-v1.4.0.zip` from the Releases tab (or clone this repository).
+2. Extract the ZIP file to a folder.
+3. Open your browser and navigate to `chrome://extensions/` (or `edge://extensions/`).
+4. Toggle the **"Developer mode"** switch in the top right.
+5. Click **"Load unpacked"** in the top left.
+6. Select the extracted `stashy` project folder.
+
+---
+
+## 🧠 Architecture Overview
+
+Stashy operates entirely in the user space inside the local browser sandbox. It utilizes content scripts to read game catalog tables and inject reactive CSS overlays, a central service worker to coordinate normalization/matching, and native storage to maintain game databases.
+
+```text
        +--------------------------------------------------------+
        |                  Active Browser Tabs                   |
        +──────────────────────────┬─────────────────────────────+
                                   │
          (DOM Scraping)           │ (DOM Hydration / Injection)
-         Scrape Game Lists        │ Matte HUD Badges
+         Scrape Game Lists        │ Solid Matte HUD Badges
                                   ▼
                     +───────────────────────────+
                     |      Content Scripts      |
@@ -27,7 +66,7 @@ Stashy operates entirely in the user space inside the local browser sandbox. It 
                     |   * epic-library.js       |
                     +─────────────┬─────────────+
                                   │
-                                  │ Runtime Messages (chrome.runtime)
+                                  │ Runtime Messages
                                   ▼
                     +───────────────────────────+
                     | Background Service Worker |
@@ -42,133 +81,10 @@ Stashy operates entirely in the user space inside the local browser sandbox. It 
                     +───────────────────────────+
 ```
 
----
-
-## Security Pillars
-
-Unlike legacy alternatives, Stashy prioritizes zero-knowledge privacy and system-level security:
-
+## 🔐 Security Pillars
 * **Zero Cloud Connections:** The extension executes 100% offline. No telemetry, analytical beacons, or platform endpoints are ever pinged.
-* **No Authentication Tokens:** The system does not request Steam API Keys, cookies, or Epic Games account credentials. It relies on passive scanning of locally loaded web structures.
-* **Sandbox Isolation:** Game database lists are strictly stored in local sandboxed key-value tables (`chrome.storage.local`), ensuring no other browser extensions can inspect your inventory.
+* **No Authentication Tokens:** The system does not request Steam API Keys or Epic Games account credentials.
+* **Sandbox Isolation:** Game databases are strictly stored in local sandboxed key-value tables.
 
----
-
-## Matching Logic & Edition Verification
-
-The matching engine inside `background.js` utilizes dynamic slug transliteration to clean special characters and Turkish-specific letters (e.g., `ç` -> `c`, `ğ` -> `g`) to guarantee high-accuracy matching.
-
-### Edition Comparison Matrix
-
-| Target Store Page Title | Synced Library Matches | Rendered HUD Badge | Alert Action |
-| :--- | :--- | :--- | :--- |
-| The Witcher 3: Wild Hunt | The Witcher 3: Wild Hunt | Owned | Clean dark slate indicator |
-| The Witcher 3: Wild Hunt - Complete Edition | The Witcher 3: Wild Hunt | Base Game Owned | Amber warning card advising expanded bundle already contains base game |
-| Assassin's Creed Odyssey | Assassin's Creed Odyssey - Gold Edition | More Complete Edition Owned | Green matte badge indicating owned version is superior to store page |
-| Anomaly Agent (DLC Package) | Anomaly Agent | Base Game Owned | Amber notification informing the user that the base game is already owned |
-
----
-
-## Project Structure
-
-```
-stashy/
-├── content/
-│   ├── badge.js             # High-frequency location observer & store page HUD injector
-│   ├── epic-library.js      # Scrapers and transaction scanners for Epic Games
-│   └── steam-library.js     # Dom block reader and lock-screener for Steam Games
-├── icons/
-│   ├── icon-48.png          # Scaled 48x48 pixel matte desktop brand logo
-│   ├── icon-128.png         # Scaled 128x128 pixel store catalog brand logo
-│   └── icon.png             # Raw original brand resource
-├── library/
-│   ├── library.html         # Unified offline catalog list HTML
-│   └── library.js           # Dynamic bilingual database renderer & local sorter
-├── popup/
-│   ├── popup.html           # Matte dashboard popup frame
-│   └── popup.js             # Language toggle listener & active platform sync router
-├── background.js            # Core matching engine, slug tokenizer, and sync port router
-├── manifest.json            # Configuration metadata and Gecko permission sets
-└── .gitignore               # Strict path filters to avoid committing private system tokens
-```
-
----
-
-## Developer API & Message Reference
-
-All extension routines interact asynchronously via `chrome.runtime.sendMessage`.
-
-### 1. GET_STATUS
-Triggered by the popup UI to fetch sync status, game counts, and update timestamps.
-
-* **Payload:** `{ type: "GET_STATUS" }`
-* **Response format:**
-```json
-{
-  "steam": {
-    "count": 98,
-    "updated": 1779182619619
-  },
-  "epic": {
-    "count": 24,
-    "updated": 1779182626675
-  }
-}
-```
-
-### 2. SAVE_STEAM_LIBRARY
-Dispatched by the Steam scraper once parsing finishes.
-
-* **Payload:** 
-```json
-{
-  "type": "SAVE_STEAM_LIBRARY",
-  "games": [
-    "Assassin's Creed Valhalla",
-    "Counter-Strike 2"
-  ]
-}
-```
-
-### 3. CHECK_GAME
-Pushed by content/badge.js to cross-reference page headings against local databases.
-
-* **Payload:** `{ type: "CHECK_GAME", title: "Assassin's Creed Odyssey" }`
-* **Response format:**
-```json
-{
-  "owned": true,
-  "platform": "Steam",
-  "isStoreMoreComplete": false,
-  "isLibraryMoreComplete": true
-}
-```
-
----
-
-## Local Development & Setup
-
-### Prerequisites
-
-* Google Chrome, Brave, Edge, or Zen Browser (Firefox-based).
-
-### Manual Load Steps (Developer Mode)
-
-#### For Google Chrome & Chromium Browsers:
-1. Open Chrome and navigate to `chrome://extensions/`.
-2. Toggle the "Developer mode" switch in the top right.
-3. Click "Load unpacked" in the top left.
-4. Select the `stashy` project root folder (`c:\projects\game-library-checker`).
-
-#### For Firefox & Zen Browser:
-1. Open the browser and navigate to `about:debugging#/runtime/this-firefox`.
-2. Click "Load Temporary Add-on...".
-3. Navigate to the `stashy` project root folder and select the `manifest.json` file.
-
----
-
-## Design Decisions
-
-* **No-Telemetry Guarantee:** We explicitly set `browser_specific_settings.gecko.data_collection_permissions.required` to `["none"]` to declare a zero-data telemetry footprint.
-* **Apple/Notion Matte UI:** Avoided typical glowing or grid-heavy gaming overlays. The interface leverages charcoal matte blocks (`#18181b`), thin subtle borders, and smooth transitions to match premium productivity interfaces.
-* **Passive Sync Framework:** Instantly saves new purchases without requiring manual manual clicks. If you naturally browse your personal inventory pages, Stashy records and syncs additions quietly in the background.
+## 🤝 Contribution
+Contributions are welcome! Feel free to open issues or submit pull requests.
