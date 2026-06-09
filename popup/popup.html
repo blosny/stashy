@@ -4,36 +4,41 @@
 <meta charset="UTF-8">
 <title>Stashy</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
   :root {
-    --bg-main: #18181b;
-    --bg-card: #27272a;
-    --border-color: rgba(255, 255, 255, 0.08);
+    --bg-main: #09090b;
+    --bg-card: #121212;
+    --bg-hover: #18181b;
+    --border-color: #27272a;
     --text-primary: #f4f4f5;
     --text-secondary: #a1a1aa;
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
+    --accent: #10b981;
+    --steam-color: #38bdf8;
+    --epic-color: #f8fafc;
     --danger-color: #ef4444;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    width: 320px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    width: 340px;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background: var(--bg-main);
     color: var(--text-primary);
     font-size: 13px;
     overflow: hidden;
-    line-height: 1.4;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
 
   .header {
-    padding: 14px 16px;
+    padding: 14px 18px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    background: var(--bg-main);
   }
 
   .logo-icon {
@@ -43,24 +48,23 @@
     justify-content: center;
     width: 28px;
     height: 28px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--bg-card);
     border-radius: 6px;
     border: 1px solid var(--border-color);
   }
 
   .header h1 {
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 800;
     color: var(--text-primary);
     flex: 1;
     letter-spacing: -0.01em;
   }
 
-  /* Language Selector Toggle */
   .lang-selector {
     display: inline-flex;
     align-items: center;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 2px;
@@ -68,13 +72,13 @@
   }
 
   .lang-pill {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
     color: var(--text-secondary);
     padding: 3px 6px;
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
   }
 
   .lang-pill:hover {
@@ -82,9 +86,8 @@
   }
 
   .lang-pill.active {
-    background: var(--bg-card);
+    background: var(--border-color);
     color: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   }
 
   #content {
@@ -102,38 +105,47 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    position: relative;
   }
 
   .platform-card:hover {
-    background: #3f3f46;
+    background: var(--bg-hover);
+    border-color: #3f3f46;
   }
 
+  .platform-card::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: -1px; width: 3px;
+    background: transparent;
+    border-radius: 3px 0 0 3px;
+    transition: background 0.2s ease;
+  }
+
+  .platform-card.steam-card:hover::before { background: var(--steam-color); }
+  .platform-card.epic-card:hover::before { background: var(--epic-color); }
+
   .platform-icon-wrapper {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--bg-main);
     border: 1px solid var(--border-color);
   }
 
-  .platform-icon-wrapper.steam {
-    color: #66c0f4;
-  }
-
-  .platform-icon-wrapper.epic {
-    color: #ffffff;
-  }
+  .platform-icon-wrapper.steam { color: var(--steam-color); }
+  .platform-icon-wrapper.epic { color: var(--epic-color); }
 
   .platform-info {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 2px;
   }
 
   .platform-title-row {
@@ -143,8 +155,9 @@
   }
 
   .platform-name {
-    font-weight: 600;
+    font-weight: 700;
     font-size: 13px;
+    color: var(--text-primary);
   }
 
   .status-indicator-dot {
@@ -155,16 +168,17 @@
   }
 
   .status-indicator-dot.active {
-    background-color: var(--success-color);
+    background-color: var(--accent);
   }
 
   .status-indicator-dot.inactive {
-    background-color: var(--warning-color);
+    background-color: #52525b;
   }
 
   .platform-meta {
     font-size: 11px;
     color: var(--text-secondary);
+    font-weight: 500;
   }
 
   .platform-meta strong {
@@ -172,24 +186,26 @@
   }
 
   .sync-banner {
-    background: rgba(245, 158, 11, 0.05);
-    border: 1px solid rgba(245, 158, 11, 0.15);
-    border-radius: 6px;
-    padding: 8px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .sync-banner-title {
     font-weight: 700;
-    font-size: 10.5px;
-    color: var(--warning-color);
-    margin-bottom: 1px;
+    font-size: 11px;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
   }
 
   .sync-banner-text {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-secondary);
     line-height: 1.4;
   }
@@ -198,6 +214,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    margin-top: 4px;
   }
 
   .btn-sync-row {
@@ -209,59 +226,59 @@
   .btn {
     padding: 8px 12px;
     border-radius: 6px;
-    border: none;
-    font-size: 11.5px;
+    border: 1px solid var(--border-color);
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    font-family: inherit;
+    background: var(--bg-card);
+    color: var(--text-primary);
   }
 
-  .btn-sync-steam {
-    background: #172a45;
-    color: #66c0f4;
-    border: 1px solid rgba(102, 192, 244, 0.15);
-    flex: 1;
+  .btn:active {
+    transform: scale(0.98);
   }
 
-  .btn-sync-steam:hover {
-    background: #1f375b;
+  .btn:hover {
+    background: var(--bg-hover);
+    border-color: #3f3f46;
   }
 
-  .btn-sync-epic {
-    background: #27272a;
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    flex: 1;
-  }
-
-  .btn-sync-epic:hover {
-    background: #3f3f46;
-  }
+  .btn-sync-steam { flex: 1; }
+  .btn-sync-epic { flex: 1; }
 
   .btn-library-show {
     width: 100%;
-    background: #4f46e5;
-    color: #ffffff;
+    background: var(--text-primary);
+    color: var(--bg-main);
+    border: none;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 10px;
   }
 
   .btn-library-show:hover {
-    background: #4338ca;
+    background: #ffffff;
   }
 
   .btn-danger-reset {
     width: 100%;
-    font-size: 10.5px;
-    color: var(--danger-color);
-    border: 1px solid rgba(239, 68, 68, 0.15);
-    background: rgba(239, 68, 68, 0.02);
+    font-size: 10px;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    padding: 4px;
+    margin-top: 4px;
   }
 
   .btn-danger-reset:hover {
-    background: rgba(239, 68, 68, 0.06);
+    color: var(--danger-color);
+    background: transparent;
+    text-decoration: underline;
   }
 
   .loading {
@@ -269,7 +286,8 @@
     font-size: 11px;
     padding: 30px 0;
     text-align: center;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
+    font-weight: 600;
   }
 </style>
 </head>

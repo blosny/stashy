@@ -71,7 +71,7 @@ async function render() {
     ? new Date(ts).toLocaleDateString(currentLang === "tr" ? "tr-TR" : "en-US", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })
     : null;
 
-  content.innerHTML = `
+  const htmlString = `
     <div class="platform-card steam-card">
       <div class="platform-icon-wrapper steam">
         ${STEAM_SVG}
@@ -128,6 +128,13 @@ async function render() {
       <button class="btn btn-danger-reset" id="btn-clear">${t.resetDb}</button>
     </div>
   `;
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  content.textContent = ''; // clear loading text safely
+  while (doc.body.firstChild) {
+    content.appendChild(doc.body.firstChild);
+  }
 
   // Bind Actions
   document.getElementById("btn-clear").addEventListener("click", async () => {

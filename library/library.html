@@ -4,31 +4,34 @@
 <meta charset="UTF-8">
 <title id="page-title">Stashy — Games Library</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
   :root {
-    --bg-main: #18181b;
-    --bg-card: #27272a;
-    --border-color: rgba(255, 255, 255, 0.08);
+    --bg-main: #09090b;
+    --bg-card: #121212;
+    --bg-hover: #18181b;
+    --border-color: #27272a;
     --text-primary: #f4f4f5;
     --text-secondary: #a1a1aa;
-    --primary-color: #4f46e5;
-    --steam-color: #66c0f4;
-    --epic-color: #ffffff;
+    --primary-color: #10b981;
+    --steam-color: #38bdf8;
+    --epic-color: #f8fafc;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background: var(--bg-main);
     color: var(--text-primary);
     min-height: 100vh;
-    padding: 40px 24px;
-    line-height: 1.4;
+    padding: 60px 24px;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
 
   .container {
-    max-width: 900px;
+    max-width: 960px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -39,14 +42,14 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--border-color);
     padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
   }
 
   .header-logo {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
   }
 
   .header-logo .icon {
@@ -54,71 +57,79 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
-    background: rgba(255, 255, 255, 0.04);
+    width: 44px;
+    height: 44px;
+    background: var(--bg-card);
     border-radius: 8px;
     border: 1px solid var(--border-color);
   }
 
   .header-logo h1 {
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--text-primary);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
   }
 
   .header-logo p {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-secondary);
+    font-weight: 500;
   }
 
-  /* Stats Section */
+  /* Stats Section - Bento Grid */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   .stat-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 16px;
+    border-radius: 12px;
+    padding: 20px;
     display: flex;
     align-items: center;
-    gap: 14px;
-    transition: background-color 0.2s;
+    gap: 16px;
+    transition: all 0.2s ease;
   }
 
   .stat-card:hover {
-    background: #3f3f46;
+    background: var(--bg-hover);
+    border-color: #3f3f46;
   }
 
   .stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 20px;
     border: 1px solid var(--border-color);
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--bg-main);
   }
 
-  .stat-icon.total { color: #a5b4fc; }
+  .stat-icon.total { color: var(--primary-color); }
   .stat-icon.steam { color: var(--steam-color); }
-  .stat-icon.epic { color: #fff; }
+  .stat-icon.epic { color: var(--epic-color); }
 
   .stat-info {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 2px;
   }
 
   .stat-label {
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -126,8 +137,10 @@
   }
 
   .stat-value {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
   }
 
   /* Dashboard Section */
@@ -135,16 +148,16 @@
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 20px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
   }
 
   .filters-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 16px;
     align-items: center;
     justify-content: space-between;
   }
@@ -152,139 +165,151 @@
   .search-wrapper {
     position: relative;
     flex: 1;
-    min-width: 260px;
+    min-width: 300px;
   }
 
   .search-input {
     width: 100%;
-    padding: 10px 14px 10px 36px;
-    background: rgba(0, 0, 0, 0.15);
+    padding: 12px 16px 12px 40px;
+    background: var(--bg-main);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    color: #fff;
+    color: var(--text-primary);
     font-size: 13px;
-    transition: border-color 0.2s;
+    font-family: inherit;
+    transition: all 0.2s ease;
   }
 
   .search-input:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: #3f3f46;
+    background: var(--bg-hover);
   }
 
   .search-icon {
     position: absolute;
-    left: 12px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-secondary);
     pointer-events: none;
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .filter-buttons {
     display: flex;
     gap: 6px;
+    background: var(--bg-main);
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
   }
 
   .filter-btn {
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
     background: transparent;
     color: var(--text-secondary);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    font-family: inherit;
   }
 
   .filter-btn:hover {
-    background: rgba(255, 255, 255, 0.04);
-    color: #fff;
+    color: var(--text-primary);
+    background: var(--bg-hover);
   }
 
   .filter-btn.active {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: #fff;
+    background: var(--border-color);
+    color: var(--text-primary);
   }
 
-  /* Library Table */
+  /* Library Table / List */
   .table-wrapper {
     overflow-x: auto;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background: rgba(0, 0, 0, 0.1);
   }
 
   table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0 4px;
     text-align: left;
     font-size: 13px;
   }
 
   th {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 10px 16px;
+    padding: 0 16px 8px 16px;
     font-weight: 700;
     color: var(--text-secondary);
-    border-bottom: 1px solid var(--border-color);
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
+  tr.game-row {
+    background: var(--bg-main);
+    transition: all 0.2s ease;
+  }
+
+  tr.game-row:hover {
+    background: var(--bg-hover);
+  }
+
   td {
-    padding: 12px 16px;
+    padding: 14px 16px;
+    border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
   }
 
-  tr:last-child td {
-    border-bottom: none;
+  td:first-child {
+    border-left: 1px solid var(--border-color);
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
   }
 
-  tr {
-    transition: background-color 0.15s;
-  }
-
-  tr:hover td {
-    background: rgba(255, 255, 255, 0.02);
+  td:last-child {
+    border-right: 1px solid var(--border-color);
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
   }
 
   .game-title {
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
   }
 
   .platform-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 10.5px;
-    font-weight: 600;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
   }
 
   .platform-badge.steam {
-    background: rgba(102, 192, 244, 0.1);
     color: var(--steam-color);
-    border: 1px solid rgba(102, 192, 244, 0.15);
   }
 
   .platform-badge.epic {
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
   }
 
   .no-results {
-    padding: 30px;
+    padding: 60px 30px;
     text-align: center;
     color: var(--text-secondary);
     font-size: 13px;
+    font-weight: 500;
   }
 </style>
 </head>
@@ -312,7 +337,7 @@
     </div>
     <div class="stat-card">
       <div class="stat-icon steam">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 .007c-5.59 0-10.25 3.903-11.53 9.17l5.96 2.47a3.54 3.54 0 0 1 3.5-1.57l3.19-4.57a3.53 3.53 0 0 1 3.53-2.94 3.55 3.55 0 0 1 3.55 3.55 3.55 3.55 0 0 1-3.55 3.55c-.71 0-1.37-.21-1.92-.57l-4.52 3.23c.04.22.06.44.06.67a3.55 3.55 0 0 1-3.55 3.55c-1.3 0-2.45-.71-3.08-1.78l-5.69-2.36A12 12 0 0 0 12 24c6.63 0 12-5.37 12-12S18.63.007 12 .007zm-2.92 13.91a1.64 1.64 0 0 0 1.64-1.64c0-.9-.73-1.64-1.64-1.64a1.64 1.64 0 0 0-1.64 1.64c0 .91.74 1.64 1.64 1.64z"/></svg>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 .007c-5.59 0-10.25 3.903-11.53 9.17l5.96 2.47a3.54 3.54 0 0 1 3.5-1.57l3.19-4.57a3.53 3.53 0 0 1 3.53-2.94 3.55 3.55 0 0 1 3.55 3.55 3.55 3.55 0 0 1-3.55 3.55c-.71 0-1.37-.21-1.92-.57l-4.52 3.23c.04.22.06.44.06.67a3.55 3.55 0 0 1-3.55 3.55c-1.3 0-2.45-.71-3.08-1.78l-5.69-2.36A12 12 0 0 0 12 24c6.63 0 12-5.37 12-12S18.63.007 12 .007zm-2.92 13.91a1.64 1.64 0 0 0 1.64-1.64c0-.9-.73-1.64-1.64-1.64a1.64 1.64 0 0 0-1.64 1.64c0 .91.74 1.64 1.64 1.64z"/></svg>
       </div>
       <div class="stat-info">
         <span class="stat-label" id="lib-steam-label">Steam Games</span>
@@ -321,7 +346,7 @@
     </div>
     <div class="stat-card">
       <div class="stat-icon epic">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 0L1.75 3v13.5L12 24l10.25-7.5V3L12 0zm7.64 15.54L12 21.05l-7.64-5.51v-9.6L12 8.78l7.64-2.84v9.6zM12 9.92c-.67 0-1.2-.53-1.2-1.2s.53-1.2 1.2-1.2 1.2.53 1.2 1.2-.53 1.2-1.2 1.2z"/></svg>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 0L1.75 3v13.5L12 24l10.25-7.5V3L12 0zm7.64 15.54L12 21.05l-7.64-5.51v-9.6L12 8.78l7.64-2.84v9.6zM12 9.92c-.67 0-1.2-.53-1.2-1.2s.53-1.2 1.2-1.2 1.2.53 1.2 1.2-.53 1.2-1.2 1.2z"/></svg>
       </div>
       <div class="stat-info">
         <span class="stat-label" id="lib-epic-label">Epic Games Games</span>
@@ -347,8 +372,8 @@
       <table id="library-table">
         <thead>
           <tr>
-            <th style="width: 65%" id="th-title">Game Title</th>
-            <th style="width: 35%" id="th-platform">Platform</th>
+            <th style="width: 70%" id="th-title">Game Title</th>
+            <th style="width: 30%" id="th-platform">Platform</th>
           </tr>
         </thead>
         <tbody id="library-body">

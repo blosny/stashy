@@ -7,6 +7,7 @@ let lastUrl = "";
 let checkInterval = null;
 let lastCheckedTitle = "";
 let lastCheckedUrl = "";
+let platformWatcher = null;
 
 const TRANSLATIONS = {
   en: {
@@ -18,52 +19,48 @@ const TRANSLATIONS = {
     ownedMoreComplete: "A more complete edition is already in your library.",
     ownedThis: "Owned on this platform",
     inLibrary: "Already in your library.",
-    ownedOther: "Owned on {other}!",
-    doublePurchase: "Already owned on your other account. Avoid double purchase.",
+    ownedOther: "Owned on {other}",
+    doublePurchase: "Already owned on your other account.",
     notOwned: "Not in Your Library",
-    notOwnedDesc: "Not owned on either platform. Safe to purchase.",
+    notOwnedDesc: "Not owned on either platform.",
     close: "Close"
   },
   tr: {
     brand: "STASHY",
-    notSynced: "Kütüphane senkronize edilmedi",
-    pleaseSync: "Lütfen eklenti menüsünden eşitleme yapın.",
+    notSynced: "Eşitleme Yapılmadı",
+    pleaseSync: "Lütfen eklentiden kütüphanenizi eşitleyin.",
     ownedBase: "Ana Oyuna Sahipsin",
-    dlcWarning: "Bu platformda ana oyun var, ancak bu sürüm ek paketler (DLC) içerebilir.",
-    ownedMoreComplete: "Daha kapsamlı bir sürüme kütüphanende sahipsin.",
-    ownedThis: "Bu platformda sahipsin",
+    dlcWarning: "Ana oyun sende var, fakat bu sürüm ek paketler içerebilir.",
+    ownedMoreComplete: "Daha kapsamlı bir sürüm kütüphanende var.",
+    ownedThis: "Bu Platformda Sahipsin",
     inLibrary: "Kütüphanende zaten mevcut.",
-    ownedOther: "{other}'de Sahipsin!",
-    doublePurchase: "Diğer hesabında var, boşuna satın alma.",
+    ownedOther: "{other}'de Sahipsin",
+    doublePurchase: "Diğer hesabında var, tekrar satın alma.",
     notOwned: "Kütüphanende Yok",
-    notOwnedDesc: "İki kütüphanede de bulunmuyor. Güvenle alabilirsin.",
+    notOwnedDesc: "İki kütüphanede de bulunmuyor.",
     close: "Kapat"
   }
 };
 
-async function initBadgeCheck() {
-  const platform = detectPlatform();
-  if (!platform) return;
+function startPlatformWatcher() {
+  if (platformWatcher) clearInterval(platformWatcher);
+  
+  platformWatcher = setInterval(async () => {
+    const platform = detectPlatform();
+    if (!platform) return;
 
-  const currentUrl = window.location.href;
-
-  console.log(`[Stashy] Badge injector active on: ${platform}`);
-
-  async function tryCheck() {
+    const currentUrl = window.location.href;
     const title = extractTitle(platform);
-    if (title) {
-      if (currentUrl !== lastCheckedUrl && title === lastCheckedTitle) {
-        console.log(`[Stashy] Stale H1 title detected ("${title}"). Waiting for SPA transition...`);
-        return false;
-      }
 
-      console.log(`[Stashy] Found fresh title: "${title}". Checking library...`);
+    if (title && (title !== lastCheckedTitle || currentUrl !== lastCheckedUrl)) {
+      console.log(`[Stashy] Detected new game: "${title}". Checking library...`);
       lastCheckedTitle = title;
       lastCheckedUrl = currentUrl;
-
-      document.getElementById("gk-badge")?.remove();
-
-      if (!chromeAPI) return true;
+      
+      document.getElementById("stashy-hud")?.remove();
+      
+      if (!chromeAPI) return;
+      
       const result = await chromeAPI.runtime.sendMessage({
         type: "CHECK_GAME",
         title,
@@ -74,39 +71,11 @@ async function initBadgeCheck() {
       const currentLang = langStore.glc_language || "en";
       
       renderBadge(result, platform, currentLang);
-      return true;
     }
-    return false;
-  }
-
-  if (checkInterval) {
-    clearInterval(checkInterval);
-  }
-
-  const success = await tryCheck();
-  if (success) return;
-
-  let attempts = 0;
-  const maxAttempts = 40; 
-
-  checkInterval = setInterval(async () => {
-    attempts++;
-    const found = await tryCheck();
-    if (found || attempts >= maxAttempts) {
-      clearInterval(checkInterval);
-      checkInterval = null;
-    }
-  }, 150);
+  }, 500);
 }
 
-// Watch for SPA URL changes
-setInterval(() => {
-  const currentUrl = window.location.href;
-  if (currentUrl !== lastUrl) {
-    lastUrl = currentUrl;
-    initBadgeCheck();
-  }
-}, 150);
+startPlatformWatcher();
 
 function detectPlatform() {
   const host = location.hostname;
@@ -140,9 +109,7 @@ function renderBadge(result, currentPlatform, lang) {
       icon: "⚠️",
       label: t.notSynced,
       sub: t.pleaseSync,
-      color: "#f59e0b",
-      bg: "#27272a",
-      borderColor: "rgba(245, 158, 11, 0.2)",
+      accent: "#f59e0b",
       lang
     });
     return;
@@ -161,9 +128,7 @@ function renderBadge(result, currentPlatform, lang) {
           icon: "⚠️",
           label: t.ownedBase,
           sub: t.dlcWarning,
-          color: "#d97706",
-          bg: "#1e1b4b",
-          borderColor: "rgba(217, 119, 6, 0.2)",
+          accent: "#d97706",
           lang
         });
       } else {
@@ -171,9 +136,7 @@ function renderBadge(result, currentPlatform, lang) {
           icon: "✓",
           label: t.ownedThis,
           sub: `${t.ownedMoreComplete} (${detailsHere.game.title})`,
-          color: "#10b981",
-          bg: "#062f4f",
-          borderColor: "rgba(16, 185, 129, 0.2)",
+          accent: "#10b981",
           lang
         });
       }
@@ -182,9 +145,7 @@ function renderBadge(result, currentPlatform, lang) {
         icon: "✓",
         label: t.ownedThis,
         sub: t.inLibrary,
-        color: "#10b981",
-        bg: "#062f4f",
-        borderColor: "rgba(16, 185, 129, 0.2)",
+        accent: "#10b981",
         lang
       });
     }
@@ -196,30 +157,24 @@ function renderBadge(result, currentPlatform, lang) {
           icon: "⚠️",
           label: `${otherName}: ${t.ownedBase}`,
           sub: t.dlcWarning,
-          color: "#d97706",
-          bg: "#1e1b4b",
-          borderColor: "rgba(217, 119, 6, 0.2)",
+          accent: "#d97706",
           lang
         });
       } else {
         createBadge({
-          icon: "📚",
+          icon: "🕹️",
           label: otherLabel,
           sub: `${t.ownedMoreComplete} (${detailsOther.game.title})`,
-          color: "#3b82f6",
-          bg: "#172554",
-          borderColor: "rgba(59, 130, 246, 0.2)",
+          accent: "#3b82f6",
           lang
         });
       }
     } else {
       createBadge({
-        icon: "📚",
+        icon: "🕹️",
         label: otherLabel,
         sub: t.doublePurchase,
-        color: "#3b82f6",
-        bg: "#172554",
-        borderColor: "rgba(59, 130, 246, 0.2)",
+        accent: "#3b82f6",
         lang
       });
     }
@@ -228,114 +183,127 @@ function renderBadge(result, currentPlatform, lang) {
       icon: "🛒",
       label: t.notOwned,
       sub: t.notOwnedDesc,
-      color: "#9ca3af",
-      bg: "#18181b",
-      borderColor: "rgba(255, 255, 255, 0.08)",
+      accent: "#71717a",
       lang
     });
   }
 }
 
-function createBadge({ icon, label, sub, color, bg, borderColor, lang }) {
-  document.getElementById("gk-badge")?.remove();
+function createBadge({ icon, label, sub, accent, lang }) {
+  document.getElementById("stashy-hud")?.remove();
 
   const t = TRANSLATIONS[lang];
-
   const el = document.createElement("div");
-  el.id = "gk-badge";
-  el.innerHTML = `
-    <div class="gk-icon-wrapper" style="color: ${color}">${icon}</div>
-    <div class="gk-text-wrapper">
-      <span class="gk-badge-brand">${t.brand}</span>
-      <strong class="gk-badge-label">${label}</strong>
-      <small class="gk-badge-sub">${sub}</small>
+  el.id = "stashy-hud";
+  
+  const htmlString = `
+    <div class="stashy-indicator" style="background-color: ${accent}"></div>
+    <div class="stashy-hud-content">
+      <div class="stashy-hud-header">
+        <span class="stashy-hud-brand">${t.brand}</span>
+        <button class="stashy-close" title="${t.close}">✕</button>
+      </div>
+      <div class="stashy-hud-body">
+        <div class="stashy-icon">${icon}</div>
+        <div class="stashy-text">
+          <strong>${label}</strong>
+          <span>${sub}</span>
+        </div>
+      </div>
     </div>
-    <button class="gk-close-btn" title="${t.close}">✕</button>
   `;
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  while (doc.body.firstChild) {
+    el.appendChild(doc.body.firstChild);
+  }
+
   el.style.cssText = `
     position: fixed;
-    top: 80px;
-    right: 24px;
-    z-index: 999999;
+    top: 32px;
+    right: 32px;
+    z-index: 2147483647;
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    background: #18181b;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: 8px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: #f4f4f5;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-left: 4px solid ${color};
+    background: #121212;
+    border: 1px solid #27272a;
+    border-radius: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #e4e4e7;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0,0,0,0.2);
+    min-width: 280px;
     max-width: 320px;
-    animation: gk-badge-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    transition: all 0.2s ease;
+    overflow: hidden;
+    animation: stashy-slide-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   `;
 
-  if (!document.getElementById("gk-badge-styles")) {
+  if (!document.getElementById("stashy-hud-styles")) {
     const style = document.createElement("style");
-    style.id = "gk-badge-styles";
+    style.id = "stashy-hud-styles";
     style.textContent = `
-      @keyframes gk-badge-in {
-        from { transform: translateY(-10px) scale(0.98); opacity: 0; }
-        to   { transform: translateY(0) scale(1); opacity: 1; }
+      @keyframes stashy-slide-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to   { transform: translateX(0); opacity: 1; }
       }
-      #gk-badge .gk-icon-wrapper {
-        font-size: 20px;
+      #stashy-hud .stashy-indicator {
+        width: 4px;
         flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        background: rgba(255, 255, 255, 0.04);
-        border-radius: 6px;
       }
-      #gk-badge .gk-text-wrapper {
+      #stashy-hud .stashy-hud-content {
+        padding: 12px 16px;
+        flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 1px;
+        gap: 8px;
       }
-      #gk-badge .gk-badge-brand {
-        font-size: 8px;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        color: #9ca3af;
-      }
-      #gk-badge .gk-badge-label {
-        font-weight: 600;
-        font-size: 13px;
-        color: #ffffff;
-        line-height: 1.3;
-      }
-      #gk-badge .gk-badge-sub {
-        font-size: 11px;
-        color: #a1a1aa;
-        line-height: 1.3;
-      }
-      #gk-badge .gk-close-btn {
-        background: none;
-        border: none;
-        color: #a1a1aa;
-        cursor: pointer;
-        opacity: 0.6;
-        font-size: 11px;
-        padding: 4px;
-        margin-left: 6px;
-        flex-shrink: 0;
-        transition: opacity 0.2s;
+      #stashy-hud .stashy-hud-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        width: 18px;
-        height: 18px;
       }
-      #gk-badge .gk-close-btn:hover {
-        opacity: 1;
+      #stashy-hud .stashy-hud-brand {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: #71717a;
+      }
+      #stashy-hud .stashy-close {
+        background: transparent;
+        border: none;
+        color: #71717a;
+        cursor: pointer;
+        font-size: 12px;
+        padding: 2px;
+        line-height: 1;
+      }
+      #stashy-hud .stashy-close:hover {
+        color: #f4f4f5;
+      }
+      #stashy-hud .stashy-hud-body {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      #stashy-hud .stashy-icon {
+        font-size: 18px;
+        line-height: 1;
+        margin-top: 2px;
+      }
+      #stashy-hud .stashy-text {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      #stashy-hud .stashy-text strong {
+        font-size: 13px;
+        font-weight: 600;
         color: #ffffff;
+        line-height: 1.2;
+      }
+      #stashy-hud .stashy-text span {
+        font-size: 12px;
+        color: #a1a1aa;
+        line-height: 1.4;
       }
     `;
     document.head.appendChild(style);
@@ -343,17 +311,19 @@ function createBadge({ icon, label, sub, color, bg, borderColor, lang }) {
 
   document.body.appendChild(el);
 
-  el.querySelector(".gk-close-btn").addEventListener("click", () => {
+  el.querySelector(".stashy-close").addEventListener("click", () => {
+    el.style.animation = "none";
+    el.style.transform = "translateX(100%)";
     el.style.opacity = "0";
-    el.style.transform = "translateY(-10px) scale(0.98)";
-    setTimeout(() => el.remove(), 200);
+    setTimeout(() => el.remove(), 300);
   });
 
   setTimeout(() => {
     if (el && el.parentNode) {
+      el.style.animation = "none";
+      el.style.transform = "translateX(100%)";
       el.style.opacity = "0";
-      el.style.transform = "translateY(-10px) scale(0.98)";
-      setTimeout(() => el.remove(), 200);
+      setTimeout(() => el.remove(), 300);
     }
   }, 8000);
 }

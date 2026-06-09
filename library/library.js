@@ -157,6 +157,7 @@ function renderTable() {
 
   filtered.forEach(game => {
     const tr = document.createElement('tr');
+    tr.className = 'game-row';
 
     const tdTitle = document.createElement('td');
     tdTitle.className = 'game-title';
@@ -166,9 +167,14 @@ function renderTable() {
     game.platforms.forEach(plat => {
       const badge = document.createElement('span');
       badge.className = `platform-badge ${plat}`;
-      badge.innerHTML = plat === 'steam' 
-        ? `${STEAM_SVG} Steam` 
-        : `${EPIC_SVG} Epic Games`;
+      
+      const parser = new DOMParser();
+      const svgString = plat === 'steam' ? STEAM_SVG : EPIC_SVG;
+      const svgDoc = parser.parseFromString(svgString, 'image/svg+xml');
+      
+      badge.appendChild(svgDoc.documentElement);
+      badge.appendChild(document.createTextNode(plat === 'steam' ? ' Steam' : ' Epic Games'));
+      
       tdPlatform.appendChild(badge);
       tdPlatform.appendChild(document.createTextNode(' '));
     });

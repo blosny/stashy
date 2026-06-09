@@ -15,14 +15,18 @@ const chromeAPI = typeof chrome !== 'undefined' && chrome.runtime ? chrome : (ty
   await waitAndExtract();
 })();
 
+let currentLang = "en";
+
 async function waitAndExtract() {
+  const langStore = chromeAPI ? await chromeAPI.storage.local.get("glc_language") : {};
+  currentLang = langStore.glc_language || "en";
+
   let attempts = 0;
   const maxAttempts = 60; // Increased to allow large libraries to load
   let lastGamesCount = 0;
   let noChangeCount = 0;
 
-  // Show dynamic glassmorphism screen overlay blocker
-  showScanningOverlay("Steam");
+  showScanningOverlay(currentLang);
 
   // Auto-scroll loop to force lazy loading
   const scrollInterval = setInterval(() => {
@@ -35,7 +39,10 @@ async function waitAndExtract() {
       const games = extractSteamGames();
 
       console.log(`[Stashy] Scraped ${games.length} games...`);
-      updateScanningOverlayText(`Scanning: ${games.length} games found... Please do not touch your mouse.`);
+      const scanText = currentLang === "tr"
+        ? `Taranıyor: ${games.length} oyun bulundu... Lütfen farenize dokunmayın.`
+        : `Scanning: ${games.length} games found... Please do not touch your mouse.`;
+      updateScanningOverlayText(scanText);
 
       if (games.length > 0) {
         if (games.length === lastGamesCount) {
@@ -59,7 +66,10 @@ async function waitAndExtract() {
         clearInterval(interval);
         console.warn("[Stashy] Steam: games list could not be loaded or is empty.");
         removeScanningOverlay();
-        showToast("Steam: No games found. Make sure your profile & game details are set to Public.", "#ef4444");
+        const errText = currentLang === "tr"
+          ? "Steam: Oyun bulunamadı. Profilinizin ve oyun detaylarınızın Herkese Açık olduğundan emin olun."
+          : "Steam: No games found. Make sure your profile & game details are set to Public.";
+        showToast(errText, "#ef4444");
         resolve();
       }
     }, 1000);
@@ -194,28 +204,33 @@ async function sendLibrary(games) {
   console.log(`[Stashy] Steam library saved: ${response.count} games`);
 
   // Toast notification for user
-  showToast(`Steam: ${games.length} games synchronized successfully ✓`);
+  const successText = currentLang === "tr"
+    ? `Steam: ${games.length} oyun başarıyla eşitlendi ✓`
+    : `Steam: ${games.length} games synchronized successfully ✓`;
+  showToast(successText, "#10b981");
 }
 
-function showToast(msg) {
+function showToast(msg, color = "#10b981") {
   const el = document.createElement("div");
   el.textContent = msg;
   el.style.cssText = `
-    position: fixed; bottom: 24px; right: 24px; z-index: 99999;
-    background: #1a9f4e; color: #fff;
-    padding: 12px 20px; border-radius: 10px;
-    font: 600 13px/1.4 system-ui, -apple-system, sans-serif;
-    box-shadow: 0 8px 32px rgba(0,0,0,.35);
-    border: 1px solid rgba(255,255,255,.1);
-    animation: gk-slide-in .25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: fixed; bottom: 32px; right: 32px; z-index: 99999;
+    background: #121212; color: #f4f4f5;
+    padding: 12px 16px; border-radius: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px; font-weight: 500;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid #27272a;
+    border-left: 4px solid ${color};
+    animation: gk-toast-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   `;
   
   if (!document.getElementById("gk-toast-style")) {
     document.head.insertAdjacentHTML("beforeend", `
       <style id="gk-toast-style">
-        @keyframes gk-slide-in {
-          from { transform: translateY(20px); opacity:0 }
-          to   { transform: translateY(0);    opacity:1 }
+        @keyframes gk-toast-in {
+          from { transform: translateX(100%); opacity:0 }
+          to   { transform: translateX(0);    opacity:1 }
         }
       </style>
     `);
@@ -230,35 +245,33 @@ function showToast(msg) {
   }, 3500);
 }
 
-function showScanningOverlay(platform) {
+function showScanningOverlay(lang) {
+  const isTr = lang === "tr";
+  const title = isTr ? "Stashy Kütüphane Eşitleme" : "Stashy Library Sync";
+  const sub = isTr ? "Oyunlarınız taranırken lütfen farenize dokunmayın." : "Please do not touch your mouse while games are scanned.";
+
   const overlay = document.createElement("div");
   overlay.id = "stashy-scanning-overlay";
   overlay.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(11, 14, 20, 0.9);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     z-index: 10000000; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; color: #fff;
-    font-family: system-ui, -apple-system, sans-serif;
-    pointer-events: all; /* Block mouse interactions completely */
+    align-items: center; justify-content: center; color: #f4f4f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    pointer-events: all;
     transition: opacity 0.5s ease;
   `;
   overlay.innerHTML = `
-    <div style="font-size: 64px; margin-bottom: 24px; animation: pulse-stashy 2s infinite;">🛡️</div>
-    <h2 style="font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em;">Stashy Library Sync</h2>
-    <p style="font-size: 14px; color: #9ca3af; margin-bottom: 20px; font-weight: 500;" id="stashy-overlay-sub">Please wait while your games are scanned... Do not touch your mouse.</p>
-    <div style="width: 240px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-      <div style="width: 30%; height: 100%; background: #4f46e5; border-radius: 3px; animation: progress-stashy 1.5s infinite ease-in-out;" id="stashy-overlay-progress"></div>
+    <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em;">${title}</h2>
+    <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 24px; font-weight: 500;" id="stashy-overlay-sub">${sub}</p>
+    <div style="width: 200px; height: 4px; background: #27272a; border-radius: 2px; overflow: hidden;">
+      <div style="width: 30%; height: 100%; background: #10b981; border-radius: 2px; animation: progress-stashy 1.5s infinite ease-in-out;" id="stashy-overlay-progress"></div>
     </div>
     <style>
-      @keyframes pulse-stashy {
-        0%, 100% { transform: scale(1); opacity: 0.8; }
-        50% { transform: scale(1.1); opacity: 1; }
-      }
       @keyframes progress-stashy {
-        0% { margin-left: -30%; width: 30%; }
-        50% { width: 40%; }
-        100% { margin-left: 100%; width: 30%; }
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(400%); }
       }
     </style>
   `;
